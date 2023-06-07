@@ -8,8 +8,13 @@ from pgmpy.models import BayesianNetwork
 from sklearn.metrics import f1_score
 
 
-def print_BN(bn: BayesianNetwork, root=None, try_visualization=False):
-    vis_ls = ["fdp"]
+def print_BN(bn: BayesianNetwork, root=None, try_visualization=False, vis_ls=None):
+
+    if vis_ls is None:
+        vis_ls = ["fdp"]
+    else:
+        vis_ls = vis_ls
+
     if try_visualization:
         vis_ls = ['neato', 'dot', 'twopi', 'fdp', 'sfdp', 'circo']
 

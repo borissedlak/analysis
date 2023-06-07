@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt
 from pgmpy.estimators import MaximumLikelihoodEstimator, TreeSearch, K2Score, HillClimbSearch
 from pgmpy.inference import VariableElimination
 from pgmpy.models import BayesianNetwork
+from pgmpy.sampling import BayesianModelSampling
 
 from util import print_BN
 
@@ -15,33 +16,37 @@ ROOT = os.path.dirname(__file__)
 
 # model = get_example_model("alarm")
 # samples = BayesianModelSampling(model).forward_sample(size=int(1e2), seed=35)
-csv_path = ROOT + f'/data/xavier_cpu.csv'
-samples = pd.read_csv(csv_path)
+files = [ROOT + f'/data/nano_cpu.csv']
+
+samples = pd.concat((pd.read_csv(f) for f in files))
 
 # Sanity check
-# print(samples.isna().any())
+print(samples.isna().any())
+
+samples = samples[samples['consumption'].notna()]
 
 samples['distance'] = samples['distance'].astype(int)
 
-samples['cpu_pods'] = pd.cut(samples['cpu_utilization'], bins=[0, 50, 70, 90, 100],
-                             labels=['Low', 'Mid', 'High', 'Very High'], include_lowest=True)
-samples['memory_pods'] = pd.cut(samples['memory_usage'], bins=[0, 50, 70, 90, 100],
-                                labels=['Low', 'Mid', 'High', 'Very High'], include_lowest=True)
+# samples['cpu_pods'] = pd.cut(samples['cpu_utilization'], bins=[0, 50, 70, 90, 100],
+#                              labels=['Low', 'Mid', 'High', 'Very High'], include_lowest=True)
+# samples['memory_pods'] = pd.cut(samples['memory_usage'], bins=[0, 50, 70, 90, 100],
+#                                 labels=['Low', 'Mid', 'High', 'Very High'], include_lowest=True)
+#
+# samples['bitrate'] = samples['fps'] * samples['pixel']
+#
+# # If this is on 30, it still includes 12 FPS
+# samples['distance_SLO'] = pd.cut(samples['distance'], bins=[0, 25, max(samples['distance'])],
+#                                  labels=[True, False], include_lowest=True)
+# # Must be a little bit increased in order to allow higher fps
+# samples['time_SLO'] = samples['execution_time'] <= (1200 / samples['fps'])
 
-samples['bitrate'] = samples['fps'] * samples['pixel']
-
-samples['distance_SLO'] = pd.cut(samples['distance'], bins=[0, 30, max(samples['distance'])],
-                                 labels=[True, False], include_lowest=True)
-samples['time_SLO'] = samples['execution_time'] <= (1500 / samples['fps'])
-
-# TODO: Reverse arrows  from FPS/Pixel to Bitrate
 
 # Why would I actually need multiple bins, if I'm only interested in whether the SLO is fulfilled or not
 # samples['bitrate_pod'] = pd.cut(samples['memory_usage'], bins=[0, max_value/num_pods, 2*max_value/num_pods, max_value], labels=False)
 
 del samples['timestamp']
-del samples['cpu_utilization']
-del samples['memory_usage']
+# del samples['cpu_utilization']
+# del samples['memory_usage']
 # del samples['bitrate']
 # del samples['pixel']
 
@@ -53,19 +58,19 @@ del samples['memory_usage']
 
 # 1. Learning Structure
 
-# scoring_method = K2Score(data=samples)
-# estimator = HillClimbSearch(data=samples)
-# estimated_model = estimator.estimate(
-#     scoring_method=scoring_method, max_indegree=4, max_iter=int(1e4)
-# )
-# print_BN(estimated_model)
+scoring_method = K2Score(data=samples)
+estimator = HillClimbSearch(data=samples)
+dag = estimator.estimate(
+    scoring_method=scoring_method, max_indegree=4, max_iter=int(1e4)
+)
+print_BN(dag, vis_ls=["circo"])
 
 # print_BN(get_mb_as_bn(estimated_model, "success"))
 # print_BN(get_mb_as_bn(estimated_model, "pixel"))
 
-est = TreeSearch(samples)
-dag = est.estimate(estimator_type="chow-liu")
-print_BN(dag, try_visualization=False)
+# est = TreeSearch(samples)
+# dag = est.estimate(estimator_type="chow-liu")
+# print_BN(dag, try_visualization=False)
 
 # get_f1_score(estimated_model, model)
 
@@ -85,6 +90,13 @@ trained_mle.fit(data=samples, estimator=MaximumLikelihoodEstimator)
 #     samples, estimator=BayesianEstimator, prior_type="dirichlet", pseudo_counts=0.1
 # )
 
+samples = BayesianModelSampling(trained_mle).forward_sample(size=int(63000), seed=30)
+samples['execution_time'] = np.floor(samples['execution_time'] * 1.10)
+samples['device_type'] = 'Nano 2GB'
+samples['GPU'] = False
+samples['Config'] = "None"
+samples.to_csv(ROOT + f'/data/nano_cpu_2GB.csv', encoding='utf-8', index=False)
+
 print("Parameter Learning Finished")
 
 # 3. Causal Inference
@@ -101,7 +113,7 @@ print(infer_non_adjust.query(variables=["time_SLO"]))
 
 for br in bitrate_list:
     sr = infer_non_adjust.query(variables=["distance_SLO", "time_SLO"], evidence={'bitrate': br}).values[1][1]
-    if sr > 0.85:
+    if sr > 0.7:
         cons = samples[samples['bitrate'] == br]['consumption'].mean()
         bitrate_comparison.append((br, sr,
                                    samples[samples['bitrate'] == br]['pixel'].iloc[0],
