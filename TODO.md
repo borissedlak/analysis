@@ -16,7 +16,7 @@
 
 ### Optics
 - [ ] Reverse arrows from FPS/Pixel to Bitrate
-- [ ] Remove bitrate to show it without
+- [ ] Remove bitrate --> distance, add fps --> distance
  
 ### Optional
 - [ ] Export to file if training takes too long
