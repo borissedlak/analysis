@@ -2,24 +2,26 @@ import os
 import sys
 
 import pandas as pd
-from pgmpy.estimators import MaximumLikelihoodEstimator, K2Score, HillClimbSearch
-from pgmpy.inference import VariableElimination
-from pgmpy.models import BayesianNetwork
+import pgmpy.base.DAG
+from pgmpy.estimators import K2Score, HillClimbSearch
+from pgmpy.readwrite import XMLBIFWriter
 
+import util
 from util import print_BN
 
 ROOT = os.path.dirname(__file__)
-
-# model = get_example_model("alarm")
-# samples = BayesianModelSampling(model).forward_sample(size=int(1e2), seed=35)
 files = [
-         # ROOT + f'/data/nano_cpu.csv',
-         ROOT + f'/data/xavier_cpu_2_10.csv',
-         ROOT + f'/data/xavier_cpu_4_15.csv',
-         ROOT + f'/data/xavier_cpu_6_20.csv',
+    ROOT + f'/data/nano_cpu.csv',
+    ROOT + f'/data/xavier_cpu_2_10.csv',
+    ROOT + f'/data/xavier_cpu_4_15.csv',
+    ROOT + f'/data/xavier_cpu_6_20.csv',
+    ROOT + f'/data/xavier_gpu_2_10.csv',
+    ROOT + f'/data/xavier_gpu_4_15.csv',
+    ROOT + f'/data/xavier_gpu_6_20.csv',
 ]
-
 samples = pd.concat((pd.read_csv(f) for f in files))
+
+# samples = get_base_data_as_sample()
 
 # samples['device_type'] = 'Xavier NX'
 # samples['GPU'] = True
@@ -41,16 +43,15 @@ samples['memory_pods'] = pd.cut(samples['memory_usage'], bins=[0, 50, 70, 90, 10
 
 samples['bitrate'] = samples['fps'] * samples['pixel']
 
-# If this is on 30, it still includes 12 FPS
-samples['distance_SLO'] = pd.cut(samples['distance'], bins=[0, 25, max(samples['distance'])],
-                                 labels=[True, False], include_lowest=True)
+# samples['distance_SLO'] = pd.cut(samples['distance'], bins=[0, 25, max(samples['distance'])],
+#                                  labels=[True, False], include_lowest=True)
 # Must be a little bit increased in order to allow higher fps
-samples['time_SLO'] = samples['execution_time'] <= (1000 / samples['fps'])
-
+# samples['time_SLO'] = samples['execution_time'] <= (1000 / samples['fps'])
 
 del samples['timestamp']
 del samples['cpu_utilization']
 del samples['memory_usage']
+del samples['device_type']
 # del samples['bitrate']
 # del samples['pixel']
 
@@ -64,10 +65,31 @@ del samples['memory_usage']
 
 scoring_method = K2Score(data=samples)
 estimator = HillClimbSearch(data=samples)
-dag = estimator.estimate(
-    scoring_method=scoring_method, max_indegree=4, max_iter=int(1e4)
+
+dag: pgmpy.base.DAG = estimator.estimate(
+    scoring_method=scoring_method, max_indegree=4
 )
+
+# Removing wrong edges
+dag.remove_edge("pixel", "GPU")  # Simply wrong
+dag.remove_edge("bitrate", "config")  # Simply wrong
+dag.remove_edge("success", "GPU")  # Simply wrong
+dag.remove_edge("success", "execution_time")  # Correlated but not causal
+
+# Reversing edges
+dag = util.fix_edge_between_u_v(dag, "GPU", "execution_time")
+dag = util.fix_edge_between_u_v(dag, "fps", "bitrate")
+dag = util.fix_edge_between_u_v(dag, "config", "consumption")
+dag = util.fix_edge_between_u_v(dag, "config", "GPU")
+
 print_BN(dag, vis_ls=["circo"])
+print_BN(util.get_mb_as_bn(model=dag, center="bitrate"), root="bitrate", save=True)
+print_BN(util.get_mb_as_bn(model=dag, center="distance"), root="distance", save=True)
+print_BN(util.get_mb_as_bn(model=dag, center="success"), root="success", save=True)
+print_BN(util.get_mb_as_bn(model=dag, center="consumption"), root="consumption", save=True)
+print_BN(util.get_mb_as_bn(model=dag, center="execution_time"), root="time_SLO", save=True)
+
+sys.exit()
 
 # print_BN(get_mb_as_bn(estimated_model, "success"))
 # print_BN(get_mb_as_bn(estimated_model, "pixel"))
@@ -84,21 +106,10 @@ print("Structure Learning Finished")
 
 model = BayesianNetwork(ebunch=dag.edges())
 model.fit(data=samples, estimator=MaximumLikelihoodEstimator)
-# print(trained_mle.get_cpds("success"))
-
-# trained_mle_2 = BayesianNetwork(ebunch=dag.edges())
-# trained_mle_2.fit(data=samples, estimator=MaximumLikelihoodEstimator)
-#
-# trained_mle_3 = BayesianNetwork(ebunch=dag.edges())
-# trained_mle_3.fit(
-#     samples, estimator=BayesianEstimator, prior_type="dirichlet", pseudo_counts=0.1
-# )
 
 print("Parameter Learning Finished")
 
-# 3. Causal Inference
-
-infer_non_adjust = VariableElimination(model)
+# infer_non_adjust = VariableElimination(model)
 # print(infer_non_adjust.query(variables=["time_SLO"]))
 # print(infer_non_adjust.query(variables=["success"],
 #                              evidence={'within_time': True, 'fps': 60}))
@@ -119,5 +130,10 @@ for br in bitrate_list:
 
 for (br, sr, pixel, fps, cons) in bitrate_comparison:
     print(pixel, fps, sr, cons)
+
+sys.exit()
+
+XMLBIFWriter(model).write_xmlbif('model.xml')
+print("Model exported as 'model.xml'")
 
 sys.exit()
