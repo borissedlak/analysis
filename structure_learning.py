@@ -3,8 +3,9 @@ import sys
 
 import pandas as pd
 import pgmpy.base.DAG
-from pgmpy.estimators import K2Score, HillClimbSearch
-from pgmpy.readwrite import XMLBIFWriter
+from pgmpy.estimators import K2Score, HillClimbSearch, MaximumLikelihoodEstimator
+from pgmpy.inference import VariableElimination
+from pgmpy.models import BayesianNetwork
 
 import util
 from util import print_BN
@@ -33,20 +34,20 @@ samples = pd.concat((pd.read_csv(f) for f in files))
 # Sanity check
 # print(samples.isna().any())
 samples = samples[samples['consumption'].notna()]
+samples.rename(columns={'execution_time': 'delay', 'success': 'transformed'}, inplace=True)
 
 samples['distance'] = samples['distance'].astype(int)
 
-samples['cpu_pods'] = pd.cut(samples['cpu_utilization'], bins=[0, 50, 70, 90, 100],
-                             labels=['Low', 'Mid', 'High', 'Very High'], include_lowest=True)
-samples['memory_pods'] = pd.cut(samples['memory_usage'], bins=[0, 50, 70, 90, 100],
-                                labels=['Low', 'Mid', 'High', 'Very High'], include_lowest=True)
+samples['CPU'] = pd.cut(samples['cpu_utilization'], bins=[0, 50, 70, 90, 100],
+                        labels=['Low', 'Mid', 'High', 'Very High'], include_lowest=True)
+samples['memory'] = pd.cut(samples['memory_usage'], bins=[0, 50, 70, 90, 100],
+                           labels=['Low', 'Mid', 'High', 'Very High'], include_lowest=True)
 
 samples['bitrate'] = samples['fps'] * samples['pixel']
 
-# samples['distance_SLO'] = pd.cut(samples['distance'], bins=[0, 25, max(samples['distance'])],
-#                                  labels=[True, False], include_lowest=True)
-# Must be a little bit increased in order to allow higher fps
-# samples['time_SLO'] = samples['execution_time'] <= (1000 / samples['fps'])
+samples['distance_SLO'] = pd.cut(samples['distance'], bins=[0, 25, max(samples['distance'])],
+                                 labels=[True, False], include_lowest=True)
+samples['time_SLO'] = samples['delay'] <= (1000 / samples['fps'])
 
 del samples['timestamp']
 del samples['cpu_utilization']
@@ -73,26 +74,22 @@ dag: pgmpy.base.DAG = estimator.estimate(
 # Removing wrong edges
 dag.remove_edge("pixel", "GPU")  # Simply wrong
 dag.remove_edge("bitrate", "config")  # Simply wrong
-dag.remove_edge("success", "GPU")  # Simply wrong
-dag.remove_edge("success", "execution_time")  # Correlated but not causal
+dag.remove_edge("transformed", "GPU")  # Simply wrong
+dag.remove_edge("transformed", "delay")  # Correlated but not causal
 
 # Reversing edges
-dag = util.fix_edge_between_u_v(dag, "GPU", "execution_time")
+dag = util.fix_edge_between_u_v(dag, "GPU", "delay")
 dag = util.fix_edge_between_u_v(dag, "fps", "bitrate")
 dag = util.fix_edge_between_u_v(dag, "config", "consumption")
+dag = util.fix_edge_between_u_v(dag, "config", "delay")
 dag = util.fix_edge_between_u_v(dag, "config", "GPU")
 
 print_BN(dag, vis_ls=["circo"])
 print_BN(util.get_mb_as_bn(model=dag, center="bitrate"), root="bitrate", save=True)
 print_BN(util.get_mb_as_bn(model=dag, center="distance"), root="distance", save=True)
-print_BN(util.get_mb_as_bn(model=dag, center="success"), root="success", save=True)
+print_BN(util.get_mb_as_bn(model=dag, center="transformed"), root="transformed", save=True)
 print_BN(util.get_mb_as_bn(model=dag, center="consumption"), root="consumption", save=True)
-print_BN(util.get_mb_as_bn(model=dag, center="execution_time"), root="time_SLO", save=True)
-
-sys.exit()
-
-# print_BN(get_mb_as_bn(estimated_model, "success"))
-# print_BN(get_mb_as_bn(estimated_model, "pixel"))
+print_BN(util.get_mb_as_bn(model=dag, center="delay"), root="time_SLO", save=True)
 
 # est = TreeSearch(samples)
 # dag = est.estimate(estimator_type="chow-liu")
@@ -109,19 +106,21 @@ model.fit(data=samples, estimator=MaximumLikelihoodEstimator)
 
 print("Parameter Learning Finished")
 
-# infer_non_adjust = VariableElimination(model)
+# 3. Causal Inference
+
+var_el = VariableElimination(model)
 # print(infer_non_adjust.query(variables=["time_SLO"]))
-# print(infer_non_adjust.query(variables=["success"],
+# print(infer_non_adjust.query(variables=["transformed"],
 #                              evidence={'within_time': True, 'fps': 60}))
 
 bitrate_list = model.get_cpds("bitrate").__getattribute__("state_names")["bitrate"]
 bitrate_comparison = []
 
-print(infer_non_adjust.query(variables=["time_SLO"]))
+# print(var_el.query(variables=["time_SLO"]))
 
 for br in bitrate_list:
-    sr = infer_non_adjust.query(variables=["distance_SLO", "time_SLO"], evidence={'bitrate': br}).values[1][1]
-    if sr > 0.7:
+    sr = var_el.query(variables=["distance_SLO", "time_SLO"], evidence={'bitrate': br}).values[1][1]
+    if sr > 0.78:
         cons = samples[samples['bitrate'] == br]['consumption'].mean()
         bitrate_comparison.append((br, sr,
                                    samples[samples['bitrate'] == br]['pixel'].iloc[0],
