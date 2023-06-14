@@ -27,11 +27,14 @@ def get_base_data_as_sample():
     return pd.concat((pd.read_csv(f) for f in files))
 
 
-def print_BN(bn: BayesianNetwork | pgmpy.base.DAG, root=None, try_visualization=False, vis_ls=None, save=False):
+def print_BN(bn: BayesianNetwork | pgmpy.base.DAG, root=None, try_visualization=False, vis_ls=None, save=False, name=None):
     if vis_ls is None:
         vis_ls = ["fdp"]
     else:
         vis_ls = vis_ls
+
+    if name is None:
+        name = root
 
     if try_visualization:
         vis_ls = ['neato', 'dot', 'twopi', 'fdp', 'sfdp', 'circo']
@@ -42,7 +45,7 @@ def print_BN(bn: BayesianNetwork | pgmpy.base.DAG, root=None, try_visualization=
             bn, pos, with_labels=True, arrowsize=20, node_size=1500, alpha=0.8, font_weight="bold",
         )
         if save:
-            plt.savefig(f"figures/{root}.png")
+            plt.savefig(f"figures/{name}.png")
         plt.show()
 
 
