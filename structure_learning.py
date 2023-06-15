@@ -1,60 +1,14 @@
-import os
 import sys
-from datetime import datetime
 
-import pandas as pd
 import pgmpy.base.DAG
-from pgmpy.estimators import K2Score, HillClimbSearch, MaximumLikelihoodEstimator, StructureScore
+from pgmpy.estimators import K2Score, HillClimbSearch, MaximumLikelihoodEstimator
 from pgmpy.inference import VariableElimination
 from pgmpy.models import BayesianNetwork
+from pgmpy.readwrite import XMLBIFWriter
 
 import util
-from util import print_BN
 
-ROOT = os.path.dirname(__file__)
-files = [
-    ROOT + f'/data/nano_cpu.csv',
-    ROOT + f'/data/xavier_cpu_2_10.csv',
-    ROOT + f'/data/xavier_cpu_4_15.csv',
-    ROOT + f'/data/xavier_cpu_6_20.csv',
-    ROOT + f'/data/xavier_gpu_2_10.csv',
-    ROOT + f'/data/xavier_gpu_4_15.csv',
-    ROOT + f'/data/xavier_gpu_6_20.csv',
-]
-samples = pd.concat((pd.read_csv(f) for f in files))
-
-# samples = get_base_data_as_sample()
-
-# samples['device_type'] = 'Xavier NX'
-# samples['GPU'] = True
-# samples['config'] = "6C 20W"
-# samples.to_csv(ROOT + f'/data/nano_cpu.csv', encoding='utf-8', index=False)
-# sys.exit()
-
-
-# Sanity check
-# print(samples.isna().any())
-samples = samples[samples['consumption'].notna()]
-samples['distance'] = samples['distance'].astype(int)
-samples.rename(columns={'execution_time': 'delay', 'success': 'transformed'}, inplace=True)
-
-samples['CPU'] = pd.cut(samples['cpu_utilization'], bins=[0, 50, 70, 90, 100],
-                        labels=['Low', 'Mid', 'High', 'Very High'], include_lowest=True)
-samples['memory'] = pd.cut(samples['memory_usage'], bins=[0, 50, 70, 90, 100],
-                           labels=['Low', 'Mid', 'High', 'Very High'], include_lowest=True)
-samples['bitrate'] = samples['fps'] * samples['pixel']
-# samples['distance_SLO'] = pd.cut(samples['distance'], bins=[0, 25, max(samples['distance'])],
-#                                  labels=[True, False], include_lowest=True)
-# samples['time_SLO'] = samples['delay'] <= (1000 / samples['fps'])
-
-
-del samples['timestamp']
-del samples['cpu_utilization']
-del samples['memory_usage']
-# del samples['device_type']
-# del samples['bitrate']
-# del samples['pixel']
-
+samples = util.get_prepared_base_samples()
 
 # 1. Learning Structure
 
@@ -62,9 +16,13 @@ scoring_method = K2Score(data=samples)  # BDeuScore | AICScore
 estimator = HillClimbSearch(data=samples)
 
 dag: pgmpy.base.DAG = estimator.estimate(
-    scoring_method=scoring_method, max_indegree=4
+    scoring_method=scoring_method, max_indegree=4, epsilon=1e-4,
 )
-print_BN(dag, vis_ls=["circo"], save=True, name="raw_model")
+
+regular = '#a1b2ff'  # blue
+special = '#c46262'  # red
+
+# print_BN(dag, vis_ls=["circo"], save=True, name="raw_model", color_map=regular)
 
 # Removing wrong edges
 dag.remove_edge("pixel", "GPU")  # Simply wrong
@@ -90,13 +48,19 @@ dag.add_edge("fps", "distance")
 dag.remove_edge("bitrate", "delay")
 dag.add_edge("pixel", "delay")
 
-print_BN(dag, vis_ls=["circo", "dot"], save=True, name='refined_model')
-sys.exit()
-print_BN(util.get_mb_as_bn(model=dag, center="bitrate"), root="bitrate", save=True)
-print_BN(util.get_mb_as_bn(model=dag, center="distance"), root="distance", save=True)
-print_BN(util.get_mb_as_bn(model=dag, center="transformed"), root="transformed", save=True)
-print_BN(util.get_mb_as_bn(model=dag, center="consumption"), root="consumption", save=True)
-print_BN(util.get_mb_as_bn(model=dag, center="delay"), root="delay", save=True)
+# print_BN(dag, vis_ls=["circo"], save=True, name='refined_model', color_map=regular)  # dot!
+# print_BN(util.get_mb_as_bn(model=dag, center="bitrate"), root="bitrate", save=True, vis_ls=["dot"],
+#          color_map=[regular, regular, regular, regular, regular, regular, regular, special])
+# print_BN(util.get_mb_as_bn(model=dag, center="distance"), root="distance", save=True,
+#          color_map=[regular, regular, special])
+# print_BN(util.get_mb_as_bn(model=dag, center="transformed"), root="transformed", save=True,
+#          color_map=[regular, regular, special, regular])
+# print_BN(util.get_mb_as_bn(model=dag, center="consumption"), root="consumption", save=True,
+#          color_map=[special, regular, regular, regular])
+# print_BN(util.get_mb_as_bn(model=dag, center="delay"), root="delay", save=True,
+#          color_map=[special, regular, regular, regular])
+# print_BN(util.get_mb_as_bn(model=dag, center="fps"), vis_ls=["circo"], root="fps", save=True,
+#          color_map=[regular, special, regular, regular, regular])
 
 print("Structure Learning Finished")
 
@@ -107,8 +71,10 @@ model.fit(data=samples, estimator=MaximumLikelihoodEstimator)
 
 print("Parameter Learning Finished")
 
+XMLBIFWriter(model).write_xmlbif('model.xml')
+print("Model exported as 'model.xml'")
 
-print(datetime.now())
+sys.exit()
 
 # 3. Causal Inference
 
@@ -119,8 +85,6 @@ var_el = VariableElimination(model)
 
 bitrate_list = model.get_cpds("bitrate").__getattribute__("state_names")["bitrate"]
 bitrate_comparison = []
-
-# print(var_el.query(variables=["time_SLO"]))
 
 for br in bitrate_list:
     sr = var_el.query(variables=["distance_SLO", "time_SLO"], evidence={'bitrate': br}).values[1][1]
@@ -133,10 +97,5 @@ for br in bitrate_list:
 
 for (br, sr, pixel, fps, cons) in bitrate_comparison:
     print(pixel, fps, sr, cons)
-
-sys.exit()
-
-XMLBIFWriter(model).write_xmlbif('model.xml')
-print("Model exported as 'model.xml'")
 
 sys.exit()

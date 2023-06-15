@@ -6,17 +6,11 @@
 - [X] Formulate reasonable SLOs
 - [X] Find the best config with SLOs respected
 - [X] Add energy consumption as another metric
-- [ ] Find a way to evaluate model evidence
-- [ ] Compare training methods and pick best
-- [ ] Get data from Jetson NX with 6 Cores CPU
-
-### Decisions
-- [ ] Simulate the GPU data if I didn't get there by Tue EoB
-- [ ] Improve the Jetson performance a bit if necessary
+- [X] Get data from Jetson NX with 6 Cores CPU
 
 ### Optics
-- [ ] Reverse arrows from FPS/Pixel to Bitrate
-- [ ] Remove bitrate --> distance, add fps --> distance
+- [X] Reverse arrows from FPS/Pixel to Bitrate
+- [X] Remove bitrate --> distance, add fps --> distance
  
 ### Optional
 - [ ] Export to file if training takes too long
