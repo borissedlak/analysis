@@ -13,18 +13,21 @@ from pgmpy.models import BayesianNetwork
 from sklearn.metrics import f1_score
 
 
-def get_prepared_base_samples():
+def get_prepared_base_samples(file=None):
     ROOT = os.path.dirname(__file__)
-    files = [
-        # ROOT + f'/data/laptop_cpu.csv',
-        # ROOT + f'/data/nano_cpu.csv',
-        ROOT + f'/data/xavier_cpu_2_10.csv',
-        ROOT + f'/data/xavier_cpu_4_15.csv',
-        ROOT + f'/data/xavier_cpu_6_20.csv',
-        ROOT + f'/data/xavier_gpu_2_10.csv',
-        ROOT + f'/data/xavier_gpu_4_15.csv',
-        ROOT + f'/data/xavier_gpu_6_20.csv',
-    ]
+    if file is None:
+        files = [
+            # ROOT + f'/data/laptop_cpu.csv',
+            # ROOT + f'/data/nano_cpu.csv',
+            ROOT + f'/data/xavier_cpu_2_10.csv',
+            ROOT + f'/data/xavier_cpu_4_15.csv',
+            ROOT + f'/data/xavier_cpu_6_20.csv',
+            ROOT + f'/data/xavier_gpu_2_10.csv',
+            ROOT + f'/data/xavier_gpu_4_15.csv',
+            ROOT + f'/data/xavier_gpu_6_20.csv',
+        ]
+    else:
+        files = [ROOT + file]
     samples = pd.concat((pd.read_csv(f) for f in files))
 
     # Sanity check
@@ -46,7 +49,7 @@ def get_prepared_base_samples():
                                           labels=[True, False], include_lowest=True)
     samples['distance_SLO_easy'] = pd.cut(samples['distance'], bins=[0, 57, max(samples['distance'])],
                                           labels=[True, False], include_lowest=True)
-    samples['time_SLO'] = samples['delay'] <= (1000 / samples['fps'])
+    samples['time_slo'] = samples['delay'] <= (1000 / samples['fps'])
 
     del samples['timestamp']
     del samples['cpu_utilization']
