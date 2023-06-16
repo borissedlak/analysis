@@ -16,6 +16,7 @@ from sklearn.metrics import f1_score
 def get_prepared_base_samples():
     ROOT = os.path.dirname(__file__)
     files = [
+        # ROOT + f'/data/laptop_cpu.csv',
         # ROOT + f'/data/nano_cpu.csv',
         ROOT + f'/data/xavier_cpu_2_10.csv',
         ROOT + f'/data/xavier_cpu_4_15.csv',
@@ -25,12 +26,6 @@ def get_prepared_base_samples():
         ROOT + f'/data/xavier_gpu_6_20.csv',
     ]
     samples = pd.concat((pd.read_csv(f) for f in files))
-
-    # samples['device_type'] = 'Xavier NX'
-    # samples['GPU'] = True
-    # samples['config'] = "6C 20W"
-    # samples.to_csv(ROOT + f'/data/nano_cpu.csv', encoding='utf-8', index=False)
-    # sys.exit()
 
     # Sanity check
     # print(samples.isna().any())
@@ -45,9 +40,12 @@ def get_prepared_base_samples():
                                labels=['Low', 'Mid', 'High', 'Very High'], include_lowest=True)
     samples['bitrate'] = samples['fps'] * samples['pixel']
     samples['bitrate'] = samples['bitrate'].astype(str)
+    samples['GPU'] = samples['GPU'].astype(bool)
 
-    samples['distance_SLO'] = pd.cut(samples['distance'], bins=[0, 25, max(samples['distance'])],
-                                     labels=[True, False], include_lowest=True)
+    samples['distance_SLO_hard'] = pd.cut(samples['distance'], bins=[0, 35, max(samples['distance'])],
+                                          labels=[True, False], include_lowest=True)
+    samples['distance_SLO_easy'] = pd.cut(samples['distance'], bins=[0, 57, max(samples['distance'])],
+                                          labels=[True, False], include_lowest=True)
     samples['time_SLO'] = samples['delay'] <= (1000 / samples['fps'])
 
     del samples['timestamp']

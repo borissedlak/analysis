@@ -2,7 +2,6 @@ import sys
 
 import pgmpy.base.DAG
 from pgmpy.estimators import K2Score, HillClimbSearch, MaximumLikelihoodEstimator
-from pgmpy.inference import VariableElimination
 from pgmpy.models import BayesianNetwork
 from pgmpy.readwrite import XMLBIFWriter
 
