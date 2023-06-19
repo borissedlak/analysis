@@ -13,4 +13,4 @@
 - [X] Remove bitrate --> distance, add fps --> distance
  
 ### Optional
-- [ ] Export to file if training takes too long
+- [X] Export to file if training takes too long
