@@ -1,3 +1,4 @@
+import itertools
 import os
 import sys
 
@@ -28,7 +29,6 @@ samples_random_2 = samples_random_2[(samples_random_2['pixel'] == 921600) & (sam
 # 2) Get the relative number of SLO violations
 
 def compare_samples_SLOs(ideal, naive, random1, random2, distance_slo, success_threshold, time_threshold):
-
     pairs = [("Ideal", ideal), ("Naive", naive), ("Random #1", random1), ("Random #2", random2)]
 
     print(f"success SLO > {success_threshold}")
@@ -57,7 +57,8 @@ def compare_samples_SLOs(ideal, naive, random1, random2, distance_slo, success_t
     print("-----------------------------------------------------\n")
 
 
-compare_samples_SLOs(samples_ideal, samples_naive, samples_random_1, samples_random_2, "distance_SLO_hard", success_threshold=0.90, time_threshold=0.95)
+compare_samples_SLOs(samples_ideal, samples_naive, samples_random_1, samples_random_2, "distance_SLO_hard",
+                     success_threshold=0.90, time_threshold=0.95)
 
 # Scenario B
 # Model result: 102240 16FPS 2C_10W GPU
@@ -75,6 +76,7 @@ samples_random_1 = samples_random_1[(samples_random_1['pixel'] == 230400) & (sam
 samples_random_2 = util.get_prepared_base_samples(f'/data/xavier_gpu_6_20.csv')
 samples_random_2 = samples_random_2[(samples_random_2['pixel'] == 409920) & (samples_random_2['fps'] == 30)]
 
-compare_samples_SLOs(samples_ideal, samples_naive, samples_random_1, samples_random_2, "distance_SLO_easy", success_threshold=0.98, time_threshold=0.75)
+compare_samples_SLOs(samples_ideal, samples_naive, samples_random_1, samples_random_2, "distance_SLO_easy",
+                     success_threshold=0.98, time_threshold=0.75)
 
 sys.exit()

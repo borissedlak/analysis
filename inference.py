@@ -1,3 +1,4 @@
+import datetime
 import sys
 
 from pgmpy.inference import VariableElimination
@@ -37,11 +38,14 @@ def get_config_for_model(distance_slo, time_slo, success_slo, network_slo, gpu):
         print(pixel, fps, mode, distance, time, transformed, cons)
 
 
+print(datetime.datetime.now())
 print("Pixel, FPS, Config, Distance, Time, Success, Consumption")
 print("--------------Scenario A --------------------")
 get_config_for_model(distance_slo="distance_SLO_hard", time_slo=0.95, success_slo=0.90, network_slo=(409920*20), gpu='False')
+print(datetime.datetime.now())
 
 print("\n--------------Scenario B --------------------")
 get_config_for_model(distance_slo="distance_SLO_easy", time_slo=0.75, success_slo=0.98, network_slo=(230400*16), gpu='True')  # Scenario B
+print(datetime.datetime.now())
 
 sys.exit()
