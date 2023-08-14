@@ -79,4 +79,15 @@ samples_random_2 = samples_random_2[(samples_random_2['pixel'] == 409920) & (sam
 compare_samples_SLOs(samples_ideal, samples_naive, samples_random_1, samples_random_2, "distance_SLO_easy",
                      success_threshold=0.98, time_threshold=0.75)
 
+# With adapted scenarios
+
+samples_random_1 = util.get_prepared_base_samples(f'/data/xavier_gpu_4_15.csv')
+samples_random_1 = samples_random_1[(samples_random_1['pixel'] == 102240) & (samples_random_1['fps'] == 26)]
+
+samples_random_2 = util.get_prepared_base_samples(f'/data/xavier_gpu_2_10.csv')
+samples_random_2 = samples_random_2[(samples_random_2['pixel'] == 921600) & (samples_random_2['fps'] == 30)]
+
+compare_samples_SLOs(samples_ideal, samples_naive, samples_random_1, samples_random_2, "distance_SLO_easy",
+                     success_threshold=0.98, time_threshold=0.75)
+
 sys.exit()
