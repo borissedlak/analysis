@@ -12,6 +12,8 @@ from pgmpy.base import DAG
 from pgmpy.models import BayesianNetwork
 from sklearn.metrics import f1_score
 
+regular = '#a1b2ff'  # blue
+special = '#c46262'  # red
 
 def get_prepared_base_samples(file=None):
     ROOT = os.path.dirname(__file__)
@@ -33,14 +35,20 @@ def get_prepared_base_samples(file=None):
     # Sanity check
     # print(samples.isna().any())
     samples = samples[samples['consumption'].notna()]
+    samples.rename(columns={'execution_time': 'delay', 'success': 'transformed'}, inplace=True)
+
+    samples['in_time'] = samples['delay'] <= (1000 / samples['fps'])
 
     samples['distance'] = samples['distance'].astype(int)
-    samples.rename(columns={'execution_time': 'delay', 'success': 'transformed'}, inplace=True)
 
     samples['CPU'] = pd.cut(samples['cpu_utilization'], bins=[0, 50, 70, 90, 100],
                             labels=['Low', 'Mid', 'High', 'Very High'], include_lowest=True)
     samples['memory'] = pd.cut(samples['memory_usage'], bins=[0, 50, 70, 90, 100],
                                labels=['Low', 'Mid', 'High', 'Very High'], include_lowest=True)
+
+    # samples['delay'] = pd.cut(samples['delay'], bins=7)
+    # samples['distance'] = pd.cut(samples['distance'], bins=7)
+
     samples['bitrate'] = samples['fps'] * samples['pixel']
     samples['bitrate'] = samples['bitrate'].astype(str)
     samples['GPU'] = samples['GPU'].astype(bool)
@@ -56,12 +64,11 @@ def get_prepared_base_samples(file=None):
     del samples['memory_usage']
     del samples['device_type']
 
-    return samples
+    return samples.sample(frac=1, random_state=35)
 
 
 def print_BN(bn: BayesianNetwork | pgmpy.base.DAG, root=None, try_visualization=False, vis_ls=None, save=False,
-             name=None,
-             color_map=None):
+             name=None, show=True, color_map=None):
     if vis_ls is None:
         vis_ls = ["fdp"]
     else:
@@ -82,7 +89,8 @@ def print_BN(bn: BayesianNetwork | pgmpy.base.DAG, root=None, try_visualization=
         if save:
             plt.box(False)
             plt.savefig(f"figures/{name}.png", dpi=400, bbox_inches="tight")  # default dpi is 100
-        plt.show()
+        if show:
+            plt.show()
 
 
 # Funtion to evaluate the learned model structures.
