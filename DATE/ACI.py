@@ -24,7 +24,7 @@ pv_per_batch_size = {}
 
 for group_name, group_df in splits:
     records[group_name] = group_df
-    pv_per_batch_size = pv_per_batch_size | {group_name: (group_name / 30)}
+    pv_per_batch_size = pv_per_batch_size | {group_name: (group_name / 30 * 100)}
 
 global_i = 0
 current_batch_size = None
@@ -136,18 +136,35 @@ while load_next_batch() is not False:
     for (i, s) in splits:
         split_known = entire_training_data[entire_training_data['batch_size'] == i]
 
+        interpolation_point = None
+        closest_index = 12
+
         # If there is no data yet, rather get the one of the closest known distribution
         if len(split_known) == 0:
-            closest_index = 12
+            interpolation_point = 30
             for j, group_df in entire_training_data.groupby('batch_size'):
                 if np.abs(j - i) < np.abs(closest_index - i):
+                    interpolation_point = closest_index
                     closest_index = j
             split_known = entire_training_data[entire_training_data['batch_size'] == closest_index]
 
         valid_items = sum(1 for (x, row) in split_known.iterrows() if row['distance']
                           >= 6 and row['part_delay'] * i <= 7000)
-        percentage_failing_SLOs = valid_items / len(split_known)
-        sr_per_batch_size = sr_per_batch_size | {i: percentage_failing_SLOs}
+        percentage_failing_SLOs = 100 * (valid_items / len(split_known))
+
+        if interpolation_point is None:
+            sr_per_batch_size = sr_per_batch_size | {i: percentage_failing_SLOs}
+        else:
+            split_known = entire_training_data[entire_training_data['batch_size'] == interpolation_point]
+            valid_items = sum(1 for (x, row) in split_known.iterrows() if row['distance']
+                              >= 6 and row['part_delay'] * i <= 7000)
+            interpolation_point_sr = 100 * (valid_items / len(split_known))
+
+            x1, y1 = (interpolation_point, interpolation_point_sr)
+            x2, y2 = (closest_index, percentage_failing_SLOs)
+
+            y = y1 + (i - x1) * (y2 - y1) / (x2 - x1)
+            sr_per_batch_size = sr_per_batch_size | {i: y}
 
     # TODO: Required for comparison later
     # if SLOs_fulfilled(next_batch):  # if SLOs are fulfilled and I attribute a high epistemic value to change
@@ -156,8 +173,8 @@ while load_next_batch() is not False:
     #     current_batch_size -= 1
 
     for (i, s) in splits:
-        if sr_per_batch_size[i] * pv_per_batch_size[i] > sr_per_batch_size[next_batch_size] * pv_per_batch_size[
-            next_batch_size]:
+        if (sr_per_batch_size[i] * pv_per_batch_size[i] >
+                sr_per_batch_size[next_batch_size] * pv_per_batch_size[next_batch_size]):
             next_batch_size = i
 
     # print(np.abs(np.mean(next_batch['distance']) - np.mean(past_training_data['distance'])))
