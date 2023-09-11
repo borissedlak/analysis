@@ -34,7 +34,7 @@ del samples['pixel']
 # samples['utilization'] = pd.cut(samples['utilization'], bins=7)
 # samples['part_delay'] = pd.cut(samples['part_delay'], bins=10)
 
-samples = samples.sample(frac=1, random_state=1)
+samples = samples.sample(frac=1, random_state=35)
 samples = samples.sort_values(by='batch_size')
 
 samples.to_csv(ROOT + '/refined.csv', index=False)
@@ -43,13 +43,13 @@ samples = pd.read_csv(ROOT + '/refined.csv')
 
 # 1. Learning Structure
 
-model = BayesianNetwork([('batch_size', 'distance'), ('batch_size', 'utilization'), ('utilization', 'part_delay'),
-                         ('batch_size', 'batch_delay'), ('part_delay', 'batch_delay')])
+model = BayesianNetwork([('batch_size', 'distance'), ('batch_size', 'utilization'), ('utilization', 'part_delay')])
+                        # ('batch_size', 'batch_delay'), ('part_delay', 'batch_delay')])
 
-util.print_BN(model, vis_ls=["circo"], root="batch_size", save=True, show=False,
-              color_map=[util.regular, util.regular, util.regular, util.regular, util.regular])
+# util.print_BN(model, vis_ls=["circo"], root="batch_size", save=True, show=False,
+#               color_map=[util.regular, util.regular, util.regular, util.regular, util.regular])
 
-model.remove_node("batch_delay")
+# model.remove_node("batch_delay")
 
 print("Structure Learning Finished")
 

@@ -17,6 +17,9 @@ ROOT = os.path.dirname(__file__)
 samples = pd.read_csv(ROOT + '/refined.csv')
 model = XMLBIFReader("../model.xml").get_model()
 
+initial_batch_size = 12
+initial_next_batch = 13
+
 # Alternatively create a pointer for each batch, this would be smarter...
 splits = samples.groupby('batch_size')
 records = {}  #
@@ -28,12 +31,13 @@ for group_name, group_df in splits:
 
 global_i = 0
 current_batch_size = None
-next_batch_size = 12
+next_batch_size = initial_batch_size
 next_batch = None
 entire_training_data = None
 past_training_data = None
 sample_size_history = []
-
+avg_surprise_history = []
+last_correct = False
 
 def load_next_batch():
     global next_batch
@@ -113,6 +117,7 @@ def get_surprise(historical_data, batch):
 
 sr_per_batch_size = {}
 ig_per_batch_size = {}
+surprise_history_per_batch = my_dict = {i: [] for i in range(12, 31)}
 
 while load_next_batch() is not False:
 
@@ -123,25 +128,45 @@ while load_next_batch() is not False:
 
     if len(model.get_cpds()) == 0:
         model.fit(data=next_batch)
-        next_batch_size = 30
+        next_batch_size = initial_next_batch
         continue
 
     # Make a prediction regarding the next batch's distribution
-    # past_data_column = past_training_data[past_training_data['batch_size'] == current_batch_size]['part_delay'].values
-    # total_surprise_for_observing_batch = get_surprise(past_data_column, next_batch['part_delay'])
-    #
-    # print(total_surprise_for_observing_batch)
-    # print("---------------")
+    past_data_column = past_training_data[past_training_data['batch_size'] == current_batch_size]['part_delay'].values
+
+    if len(past_data_column):
+        avg_surprise_for_observing_batch = get_surprise(past_data_column, next_batch['part_delay']) / current_batch_size
+
+        surprise_history_per_batch[current_batch_size].append(avg_surprise_for_observing_batch)
+        # print(avg_surprise_for_observing_batch)
+        # print("---------------")
+
+    total_sum, total_count = (0, 0)
+    for key, value in my_dict.items():
+        total_sum += sum(value)
+        total_count += len(value)
+
+    if total_count > 0:
+        avg_surprise_over_all_batches = total_sum / total_count
+        avg_surprise_history.append(avg_surprise_over_all_batches)
+    else:
+        avg_surprise_over_all_batches = 5
 
     for (i, s) in splits:
         split_known = entire_training_data[entire_training_data['batch_size'] == i]
 
+        if len(surprise_history_per_batch[i]) == 0:
+            ig_per_batch_size[i] = 115
+        else:
+            ig_per_batch_size[i] = np.ceil(
+                np.median(surprise_history_per_batch[i]) / avg_surprise_over_all_batches * 100)
+
         interpolation_point = None
-        closest_index = 12
+        closest_index = initial_batch_size
 
         # If there is no data yet, rather get the one of the closest known distribution
         if len(split_known) == 0:
-            interpolation_point = 30
+            interpolation_point = initial_next_batch
             for j, group_df in entire_training_data.groupby('batch_size'):
                 if np.abs(j - i) < np.abs(closest_index - i):
                     interpolation_point = closest_index
@@ -167,15 +192,24 @@ while load_next_batch() is not False:
             sr_per_batch_size = sr_per_batch_size | {i: y}
 
     # TODO: Required for comparison later
-    # if SLOs_fulfilled(next_batch):  # if SLOs are fulfilled and I attribute a high epistemic value to change
-    #     current_batch_size += 1
-    # else:
-    #     current_batch_size -= 1
+    if SLOs_fulfilled(next_batch):  # if SLOs are fulfilled and I attribute a high epistemic value to change
+        if last_correct:
+            next_batch_size += 1
+            last_correct = False
+        else:
+            last_correct = True
+    else:
+        if not last_correct:
+            next_batch_size -= 1
+            last_correct = True
+        else:
+            last_correct = False
 
-    for (i, s) in splits:
-        if (sr_per_batch_size[i] * pv_per_batch_size[i] >
-                sr_per_batch_size[next_batch_size] * pv_per_batch_size[next_batch_size]):
-            next_batch_size = i
+    # for (i, s) in splits:
+    #     if (sr_per_batch_size[i] * pv_per_batch_size[i] * ig_per_batch_size[i] >
+    #             sr_per_batch_size[next_batch_size] * pv_per_batch_size[next_batch_size] * ig_per_batch_size[
+    #                 next_batch_size]):
+    #         next_batch_size = i
 
     # print(np.abs(np.mean(next_batch['distance']) - np.mean(past_training_data['distance'])))
 
