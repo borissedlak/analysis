@@ -34,7 +34,7 @@ del samples['pixel']
 # samples['utilization'] = pd.cut(samples['utilization'], bins=7)
 # samples['part_delay'] = pd.cut(samples['part_delay'], bins=10)
 
-samples = samples.sample(frac=1, random_state=35)
+samples = samples.sample(frac=1, random_state=10)
 samples = samples.sort_values(by='batch_size')
 
 samples.to_csv(ROOT + '/refined.csv', index=False)

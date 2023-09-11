@@ -1,9 +1,9 @@
 import csv
 import os
 
-import pandas as pd
 from matplotlib import pyplot as plt
-from pandas import arrays
+
+plt.rcParams['font.family'] = 'serif'
 
 ROOT = os.path.dirname(__file__)
 filename = ROOT + '/batch_size_history.csv'
@@ -31,9 +31,9 @@ for idx, arr in enumerate(batch_size_data):
 # Add labels, legend, and title
 ax.set_xticks(range(1, max_length + 1, 2))
 ax.set_yticks(range(12, 31, 3))
-ax.set_xlabel('Training Round')
-ax.set_ylabel('Configured batch size')
-ax.set_title('History of batch sizes over the training time')
+ax.set_xlabel('Active Inference Cycle')
+ax.set_ylabel('Configured Batch Size')
+ax.set_title('History of batch sizes per ACI cycle')
 ax.legend()
 
 ax.set_aspect('auto', adjustable='box')

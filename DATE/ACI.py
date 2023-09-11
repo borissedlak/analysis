@@ -1,3 +1,4 @@
+import csv
 import datetime
 import os
 import sys
@@ -18,7 +19,7 @@ samples = pd.read_csv(ROOT + '/refined.csv')
 model = XMLBIFReader("../model.xml").get_model()
 
 initial_batch_size = 12
-initial_next_batch = 13
+initial_next_batch = 30
 
 # Alternatively create a pointer for each batch, this would be smarter...
 splits = samples.groupby('batch_size')
@@ -38,6 +39,8 @@ past_training_data = None
 sample_size_history = []
 avg_surprise_history = []
 last_correct = False
+regression_points = []
+
 
 def load_next_batch():
     global next_batch
@@ -126,6 +129,9 @@ while load_next_batch() is not False:
     # plot_histogram_with_normal_distribution(next_batch['part_delay'])
     # plot_boxplot(next_batch['part_delay'])
 
+    for (x, row) in next_batch.iterrows():
+        regression_points.append((int(row['utilization']), int(row['part_delay'])))
+
     if len(model.get_cpds()) == 0:
         model.fit(data=next_batch)
         next_batch_size = initial_next_batch
@@ -192,24 +198,24 @@ while load_next_batch() is not False:
             sr_per_batch_size = sr_per_batch_size | {i: y}
 
     # TODO: Required for comparison later
-    if SLOs_fulfilled(next_batch):  # if SLOs are fulfilled and I attribute a high epistemic value to change
-        if last_correct:
-            next_batch_size += 1
-            last_correct = False
-        else:
-            last_correct = True
-    else:
-        if not last_correct:
-            next_batch_size -= 1
-            last_correct = True
-        else:
-            last_correct = False
+    # if SLOs_fulfilled(next_batch):  # if SLOs are fulfilled and I attribute a high epistemic value to change
+    #     if last_correct:
+    #         next_batch_size += 1
+    #         last_correct = False
+    #     else:
+    #         last_correct = True
+    # else:
+    #     if not last_correct:
+    #         next_batch_size -= 1
+    #         last_correct = True
+    #     else:
+    #         last_correct = False
 
-    # for (i, s) in splits:
-    #     if (sr_per_batch_size[i] * pv_per_batch_size[i] * ig_per_batch_size[i] >
-    #             sr_per_batch_size[next_batch_size] * pv_per_batch_size[next_batch_size] * ig_per_batch_size[
-    #                 next_batch_size]):
-    #         next_batch_size = i
+    for (i, s) in splits:
+        if (sr_per_batch_size[i] * pv_per_batch_size[i] * ig_per_batch_size[i] >
+                sr_per_batch_size[next_batch_size] * pv_per_batch_size[next_batch_size] * ig_per_batch_size[
+                    next_batch_size]):
+            next_batch_size = i
 
     # print(np.abs(np.mean(next_batch['distance']) - np.mean(past_training_data['distance'])))
 
@@ -220,5 +226,9 @@ while load_next_batch() is not False:
 x_values = range(1, len(sample_size_history) + 1)
 plt.plot(x_values, sample_size_history, marker='o', linestyle='-')
 plt.show()
+
+with open(ROOT + '/regression_points.csv', mode='w', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerows(regression_points)
 
 sys.exit()
