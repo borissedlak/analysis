@@ -33,7 +33,7 @@ ax.set_xticks(range(1, max_length + 1, 2))
 ax.set_yticks(range(12, 31, 3))
 ax.set_xlabel('Active Inference Cycle')
 ax.set_ylabel('Configured Batch Size')
-ax.set_title('History of batch sizes per ACI cycle')
+# ax.set_title('History of batch sizes per ACI cycle')
 ax.legend()
 
 ax.set_aspect('auto', adjustable='box')
