@@ -42,8 +42,8 @@ y_pred_part = model_part_training_data.predict(poly_features.fit_transform(x_ran
 
 fig, ax = plt.subplots()
 ax.scatter(x_utilization, y_delay_per_part, label='Observations', marker='o')
-ax.plot(x_range, y_pred_full, label='Full Data', color='red')
-ax.plot(x_range, y_pred_part, label='Thirty Values', color='green')
+ax.plot(x_range, y_pred_full, label='Full Data', color='green')
+ax.plot(x_range, y_pred_part, label='Thirty Values', color='red')
 
 # Add labels and a legend
 ax.set_xlabel('Utilization')
@@ -74,8 +74,8 @@ for i in range(len(x_utilization) - 1):
 
 fig, ax = plt.subplots()
 
-boxplot1 = ax.boxplot(diff_part, positions=[1], labels=['Thirty Values'], patch_artist=True)
-boxplot2 = ax.boxplot(diff_full, positions=[2], labels=['Full Data'], patch_artist=True)
+boxplot1 = ax.boxplot(diff_part, positions=[2], labels=['Thirty Values'], patch_artist=True)
+boxplot2 = ax.boxplot(diff_full, positions=[1], labels=['Full Data'], patch_artist=True)
 
 boxplot1['boxes'][0].set_facecolor('red')
 boxplot2['boxes'][0].set_facecolor('green')
