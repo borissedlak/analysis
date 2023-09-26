@@ -1,11 +1,9 @@
 import csv
 import os
-import sys
 
 import numpy as np
 from matplotlib import pyplot as plt
 
-import sympy as sp
 plt.rcParams['font.family'] = 'serif'
 
 ROOT = os.path.dirname(__file__)

@@ -13,16 +13,16 @@ import util
 
 # 1) Load all the data
 
-samples_ideal = util.get_prepared_base_samples(f'/data/xavier_cpu_4_15.csv')
+samples_ideal = util.get_prepared_base_samples(f'/data/xavier_cpu_4_15.csv', train=False)
 samples_ideal = samples_ideal[(samples_ideal['pixel'] == 102240) & (samples_ideal['fps'] == 20)]
 
-samples_naive = util.get_prepared_base_samples(f'/data/xavier_cpu_6_20.csv')
+samples_naive = util.get_prepared_base_samples(f'/data/xavier_cpu_6_20.csv', train=False)
 samples_naive = samples_naive[(samples_naive['pixel'] == 230400) & (samples_naive['fps'] == 30)]
 
-samples_random_1 = util.get_prepared_base_samples(f'/data/xavier_cpu_6_20.csv')
+samples_random_1 = util.get_prepared_base_samples(f'/data/xavier_cpu_6_20.csv', train=False)
 samples_random_1 = samples_random_1[(samples_random_1['pixel'] == 25440) & (samples_random_1['fps'] == 16)]
 
-samples_random_2 = util.get_prepared_base_samples(f'/data/xavier_cpu_2_10.csv')
+samples_random_2 = util.get_prepared_base_samples(f'/data/xavier_cpu_2_10.csv', train=False)
 samples_random_2 = samples_random_2[(samples_random_2['pixel'] == 921600) & (samples_random_2['fps'] == 12)]
 
 

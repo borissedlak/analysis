@@ -1,4 +1,3 @@
-import datetime
 import sys
 
 from pgmpy.inference import VariableElimination
@@ -22,9 +21,9 @@ def get_config_for_model(distance_slo, time_slo, success_slo, network_slo, gpu):
 
     for br in bitrate_list:
         for mode in mode_list:
-            distance = var_el.query(variables=[distance_slo], evidence={'bitrate': br, 'config': mode, 'GPU': gpu}).values[1]
-            time = var_el.query(variables=["time_slo"], evidence={'bitrate': br, 'config': mode, 'GPU': gpu}).values[1]
-            transformed = var_el.query(variables=["transformed"], evidence={'bitrate': br, 'config': mode, 'GPU': gpu}).values[1]
+            distance = var_el.query(variables=[distance_slo], evidence={'bitrate': br, 'config': mode}).values[1]
+            time = var_el.query(variables=["time_slo"], evidence={'bitrate': br, 'config': mode}).values[1]
+            transformed = var_el.query(variables=["transformed"], evidence={'bitrate': br, 'config': mode}).values[1]
 
             if distance >= 0.95 and time >= time_slo and transformed >= success_slo and int(br) <= network_slo:
                 cons = samples[samples['bitrate'] == br]['consumption'].mean()  # this must be evaluated live
@@ -38,18 +37,17 @@ def get_config_for_model(distance_slo, time_slo, success_slo, network_slo, gpu):
         print(pixel, fps, mode, distance, time, transformed, cons)
 
 
-print(datetime.datetime.now())
+# print(datetime.datetime.now())
 print("Pixel, FPS, Config, Distance, Time, Success, Consumption")
 print("--------------Scenario A --------------------")
 get_config_for_model(distance_slo="distance_SLO_hard", time_slo=0.95, success_slo=0.90, network_slo=(409920*20), gpu='False')
 # print(datetime.datetime.now())
-
-print("\n--------------Scenario B --------------------")
-get_config_for_model(distance_slo="distance_SLO_easy", time_slo=0.75, success_slo=0.98, network_slo=(230400*16), gpu='True')
-# print(datetime.datetime.now())
-print("Adapted #1:")
-get_config_for_model(distance_slo="distance_SLO_easy", time_slo=0.00, success_slo=0.98, network_slo=(230400*16), gpu='True')
-print("Adapted #2:")
-get_config_for_model(distance_slo="time_slo", time_slo=0.00, success_slo=0.98, network_slo=(230400*9999), gpu='True')
+# print("\n--------------Scenario B --------------------")
+# get_config_for_model(distance_slo="distance_SLO_easy", time_slo=0.75, success_slo=0.98, network_slo=(230400*16), gpu='True')
+# # print(datetime.datetime.now())
+# print("Adapted #1:")
+# get_config_for_model(distance_slo="distance_SLO_easy", time_slo=0.00, success_slo=0.98, network_slo=(230400*16), gpu='True')
+# print("Adapted #2:")
+# get_config_for_model(distance_slo="time_slo", time_slo=0.00, success_slo=0.98, network_slo=(230400*9999), gpu='True')
 
 sys.exit()

@@ -2,11 +2,8 @@ import os
 import sys
 
 import pandas as pd
-from pgmpy.estimators import MaximumLikelihoodEstimator
 from pgmpy.models import BayesianNetwork
 from pgmpy.readwrite import XMLBIFWriter
-
-import util
 
 # 0. Preprocessing
 

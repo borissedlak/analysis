@@ -15,12 +15,13 @@ from sklearn.metrics import f1_score
 regular = '#a1b2ff'  # blue
 special = '#c46262'  # red
 
-def get_prepared_base_samples(file=None):
+
+def get_prepared_base_samples(file=None, train=True):
     ROOT = os.path.dirname(__file__)
     if file is None:
         files = [
-            # ROOT + f'/data/laptop_cpu.csv',
-            # ROOT + f'/data/nano_cpu.csv',
+            ROOT + f'/data/laptop_cpu.csv',
+            ROOT + f'/data/nano_cpu.csv',
             ROOT + f'/data/xavier_cpu_2_10.csv',
             ROOT + f'/data/xavier_cpu_4_15.csv',
             ROOT + f'/data/xavier_cpu_6_20.csv',
@@ -64,7 +65,8 @@ def get_prepared_base_samples(file=None):
     del samples['memory_usage']
     del samples['device_type']
 
-    return samples.sample(frac=1, random_state=35)
+    percentage_samples = 0.80 if train else 0.20
+    return samples.sample(n=int(len(samples) * percentage_samples), random_state=35)
 
 
 def print_BN(bn: BayesianNetwork | pgmpy.base.DAG, root=None, try_visualization=False, vis_ls=None, save=False,

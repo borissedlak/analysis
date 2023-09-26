@@ -1,22 +1,17 @@
 import csv
-import datetime
 import os
 import sys
 
-import scipy.stats as stats
 import numpy as np
 import pandas as pd
+import scipy.stats as stats
 from matplotlib import pyplot as plt
-from pgmpy.estimators import MaximumLikelihoodEstimator
-from pgmpy.inference import VariableElimination
 from pgmpy.readwrite import XMLBIFReader
 from scipy.stats import norm
 
-from util import get_prepared_base_samples
-
 ROOT = os.path.dirname(__file__)
 samples = pd.read_csv(ROOT + '/refined.csv')
-model = XMLBIFReader("../model.xml").get_model()
+model = XMLBIFReader("model.xml").get_model()
 
 initial_batch_size = 12
 initial_next_batch = 30

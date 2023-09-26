@@ -15,41 +15,41 @@ scoring_method = K2Score(data=samples)  # BDeuScore | AICScore
 estimator = HillClimbSearch(data=samples)
 
 dag: pgmpy.base.DAG = estimator.estimate(
-    scoring_method=scoring_method, max_indegree=4, epsilon=1e-4,
+    scoring_method=scoring_method, max_indegree=4, epsilon=30,
 )
 
 regular = '#a1b2ff'  # blue
 special = '#c46262'  # red
 
-# print_BN(dag, vis_ls=["circo"], save=True, name="raw_model", color_map=regular)
+util.print_BN(dag, vis_ls=["circo"], save=True, name="raw_model", color_map=regular)
 
 # Removing wrong edges
-dag.remove_edge("pixel", "GPU")  # Simply wrong
-dag.remove_edge("bitrate", "config")  # Simply wrong
-dag.remove_edge("transformed", "GPU")  # Simply wrong
-dag.remove_edge("transformed", "delay")  # Correlated but not causal
-dag.remove_edge("delay", "consumption")  # Correlated but not causal
-dag.remove_edge("delay", "CPU")  # Correlated but not causal
-dag.remove_edge("config", "memory")  # This is rather the device type
-dag.remove_edge("GPU", "config")  # This is rather the device type, but this was removed...
-
-# Reversing edges
-dag = util.fix_edge_between_u_v(dag, "GPU", "delay")
-dag = util.fix_edge_between_u_v(dag, "fps", "bitrate")
-dag = util.fix_edge_between_u_v(dag, "config", "consumption")
-dag = util.fix_edge_between_u_v(dag, "config", "delay")
-
-# Bitrate correction
-dag.remove_edge("bitrate", "transformed")
-dag.add_edge("pixel", "transformed")
-dag.remove_edge("bitrate", "distance")
-dag.add_edge("fps", "distance")
-dag.remove_edge("bitrate", "delay")
-dag.add_edge("pixel", "delay")
-
+# dag.remove_edge("pixel", "GPU")  # Simply wrong
+# dag.remove_edge("bitrate", "config")  # Simply wrong
+# dag.remove_edge("transformed", "GPU")  # Simply wrong
+# dag.remove_edge("transformed", "delay")  # Correlated but not causal
+# dag.remove_edge("delay", "consumption")  # Correlated but not causal
+# dag.remove_edge("delay", "CPU")  # Correlated but not causal
+# dag.remove_edge("config", "memory")  # This is rather the device type
+# dag.remove_edge("GPU", "config")  # This is rather the device type, but this was removed...
+#
+# # Reversing edges
+# dag = util.fix_edge_between_u_v(dag, "GPU", "delay")
+# dag = util.fix_edge_between_u_v(dag, "fps", "bitrate")
+# dag = util.fix_edge_between_u_v(dag, "config", "consumption")
+# dag = util.fix_edge_between_u_v(dag, "config", "delay")
+#
+# # Bitrate correction
+# dag.remove_edge("bitrate", "transformed")
+# dag.add_edge("pixel", "transformed")
+# dag.remove_edge("bitrate", "distance")
+# dag.add_edge("fps", "distance")
+# dag.remove_edge("bitrate", "delay")
+# dag.add_edge("pixel", "delay")
 
 # util.print_BN(dag, vis_ls=["circo"], save=True, name='refined_model', color_map=regular)  # dot!
 # dag.remove_edge("transformed", "delay")  # Correlated but not causal
+
 
 # util.print_BN(util.get_mb_as_bn(model=dag, center="bitrate"), root="bitrate", save=True, vis_ls=["dot"],
 #          color_map=[regular, regular, regular, regular, regular, regular, regular, special])
