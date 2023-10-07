@@ -94,7 +94,8 @@ df_video_change = pd.read_csv(ROOT + '/video_change.csv')
 
 ############################################################################################################
 
-for df, name in [(df_stream_change, "stream_change.png"), (df_video_change, "video_change.png")]:
+for df, name, star in [(df_stream_change, "stream_change.png", "# Clients Change"),
+                       (df_video_change, "video_change.png", "Video Change")]:
 
     fig, ax = plt.subplots()
 
@@ -108,12 +109,12 @@ for df, name in [(df_stream_change, "stream_change.png"), (df_video_change, "vid
     first_label = True
     for index, row in df.iterrows():
         if row['change_in_config'] and index > 1:
-            plt.scatter(index + 1, row['pv'], marker='o', color='blue', label="Conf Change" if first_label else None)
+            plt.scatter(index + 1, row['pv'], marker='o', color='blue', label="Config Change" if first_label else None)
             plt.scatter(index + 1, row['ra'], marker='o', color='blue')
             first_label = False
 
     plt.scatter([3, 3], [df.iloc[2]['pv'], df.iloc[2]['ra']], marker='*', color='orange',
-                label="SLO Change")
+                label=star)
 
     ax.set_xlim(0, 20)
     ax.set_ylim(-0.03, 1.05)
