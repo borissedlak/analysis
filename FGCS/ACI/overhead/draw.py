@@ -24,8 +24,8 @@ boxplot4 = ax.boxplot(df_gpu_no_aci['cpu'], positions=[4], labels=['GPU NO'], pa
 
 boxplot1['boxes'][0].set_facecolor('brown')
 boxplot2['boxes'][0].set_facecolor('brown')
-boxplot3['boxes'][0].set_facecolor('purple')
-boxplot4['boxes'][0].set_facecolor('purple')
+boxplot3['boxes'][0].set_facecolor('gold')
+boxplot4['boxes'][0].set_facecolor('gold')
 
 ax.set_ylabel('CPU Utilization (%)')
 # ax.set_ylabel('ACI Cycle Execution (ms)')
