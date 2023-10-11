@@ -1,3 +1,5 @@
+import sys
+
 import joblib
 import numpy as np
 from matplotlib import pyplot as plt
@@ -9,6 +11,28 @@ model_Laptop = joblib.load("models/Laptop.sav")
 model_Xavier = joblib.load("models/Xavier.sav")
 model_Orin = joblib.load("models/Orin.sav")
 model_Nano = joblib.load("models/Nano.sav")
+
+# y_pred_full = model_Xavier.predict(poly_features.fit_transform(np.array([[1, 0]])))
+# y_pred_factor = y_pred_full[:, 0] * y_pred_full[:, 1]
+# print(y_pred_factor)
+#
+# y_pred_full = model_Xavier.predict(poly_features.fit_transform(np.array([[5, 1]])))
+# y_pred_factor = y_pred_full[:, 0] * y_pred_full[:, 1]
+# print(y_pred_factor)
+#
+# y_pred_full = model_Laptop.predict(poly_features.fit_transform(np.array([[9, 0]])))
+# y_pred_factor = y_pred_full[:, 0] * y_pred_full[:, 1]
+# print(y_pred_factor)
+#
+# y_pred_full = model_Orin.predict(poly_features.fit_transform(np.array([[9, 1]])))
+# y_pred_factor = y_pred_full[:, 0] * y_pred_full[:, 1]
+# print(y_pred_factor)
+#
+# y_pred_full = model_Nano.predict(poly_features.fit_transform(np.array([[1, 0]])))
+# y_pred_factor = y_pred_full[:, 0] * y_pred_full[:, 1]
+# print(y_pred_factor)
+#
+# sys.exit()
 
 x_range = np.linspace(1, 26)
 fig, ax = plt.subplots()

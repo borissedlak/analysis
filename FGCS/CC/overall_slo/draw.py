@@ -10,7 +10,12 @@ from matplotlib import pyplot as plt
 ROOT = os.path.dirname(__file__)
 fig, ax = plt.subplots()
 
-for file, label in [(ROOT + '/single.csv', 'Single'), (ROOT + '/inferred.csv', 'Inferred'),
+category_color_map = {'Laptop CPU': 'red', 'Nano CPU': 'blue', 'Xavier CPU': 'green',
+                      'Xavier GPU': 'orange', 'Orin GPU': 'grey'}
+
+first_bar = True
+
+for file, label in [(ROOT + '/single.csv', 'Single (1)'), (ROOT + '/inferred.csv', 'Inferred'),
                     (ROOT + '/random.csv', 'Random'), (ROOT + '/equal.csv', 'Equal')]:
 
     df = pd.read_csv(file)
@@ -21,19 +26,43 @@ for file, label in [(ROOT + '/single.csv', 'Single'), (ROOT + '/inferred.csv', '
     result = df.groupby('id')['fact'].mean()
     result_dict = result.to_dict()
 
+    result_dict['Laptop CPU'] = result_dict['Laptop0']
+    result_dict['Xavier CPU'] = result_dict['Xavier0']
+    result_dict['Xavier GPU'] = result_dict['Xavier1']
+    result_dict['Orin GPU'] = result_dict['Orin1']
+    result_dict['Nano CPU'] = result_dict['Nano0']
+    del result_dict['Laptop0']
+    del result_dict['Xavier0']
+    del result_dict['Xavier1']
+    del result_dict['Orin1']
+    del result_dict['Nano0']
+
     categories = list(result_dict.keys())
     values = list(result_dict.values())
 
     bottom = 0
 
     for category, value in zip(categories, values):
-        plt.bar(label, value, bottom=bottom, label=category, width=0.4)
+        col = category_color_map[category]
+        lab = category if first_bar else None
+        plt.bar(label, value, bottom=bottom, label=lab, color=col, width=0.4)
         bottom += value
 
-plt.ylabel('Overll SLO fulfillment')
+    first_bar = False
+
+# bottom = 0
+# for category, value in [('Laptop0', 0.63), ('Nano0', 0.73), ('Orin1', 0.62),
+#                         ('Xavier0', 0.62), ('Xavier1', 0.61)]:
+#     col = category_color_map[category]
+#     lab = category if first_bar else None
+#     plt.bar('Expectation', value, bottom=bottom, label=lab, color=col, width=0.4)
+#     bottom += value
+
+plt.ylabel('Overall SLO fulfillment')
 plt.legend()
-ax.set_ylim(0, 5)
+ax.set_ylim(0, 4.2)
 fig.set_size_inches(4.5, 3.3)
 
 # Show the plot
+plt.savefig("overall_slo_performance.png", dpi=600, bbox_inches="tight")  # default dpi is 100
 plt.show()
