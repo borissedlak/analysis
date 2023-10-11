@@ -10,8 +10,8 @@ from matplotlib import pyplot as plt
 ROOT = os.path.dirname(__file__)
 fig, ax = plt.subplots()
 
-category_color_map = {'Laptop CPU': 'red', 'Nano CPU': 'blue', 'Xavier CPU': 'green',
-                      'Xavier GPU': 'orange', 'Orin GPU': 'grey'}
+category_color_map = {'Laptop CPU': 'red', 'Nano CPU': 'yellow', 'Xavier CPU': 'green',
+                      'Xavier GPU': 'blue', 'Orin GPU': 'black'}
 
 first_bar = True
 
@@ -45,7 +45,7 @@ for file, label in [(ROOT + '/single.csv', 'Single (1)'), (ROOT + '/inferred.csv
     for category, value in zip(categories, values):
         col = category_color_map[category]
         lab = category if first_bar else None
-        plt.bar(label, value, bottom=bottom, label=lab, color=col, width=0.4)
+        plt.bar(label, value, bottom=bottom, label=lab, color=col, width=0.5)
         bottom += value
 
     first_bar = False
