@@ -37,7 +37,7 @@ plt.plot(x, gpu_diff.iloc[0:100], color='gold', label="Diff GPU")
 # plt.scatter([3, 3], [df.iloc[2]['pv'], df.iloc[2]['ra']], marker='*', color='orange',
 #             label=star)
 
-ax.set_xlim(0, 70)
+ax.set_xlim(0, 60)
 fig.set_size_inches(4.5, 3.3)
 ax.set_xlabel('ACI Cycle Iteration')
 ax.set_ylabel('Difference KT/Scratch SLOs')

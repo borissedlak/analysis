@@ -10,13 +10,14 @@ from matplotlib import pyplot as plt
 ROOT = os.path.dirname(__file__)
 fig, ax = plt.subplots()
 
-category_color_map = {'Laptop CPU': 'red', 'Nano CPU': 'yellow', 'Xavier CPU': 'green',
-                      'Xavier GPU': 'blue', 'Orin GPU': 'black'}
+category_color_map = {r'$\mathit{Laptop}$': 'firebrick', r'$\mathit{Nano}$': 'chocolate',
+                      r'$\mathit{Xavier_{CPU}}$': 'mediumaquamarine',
+                      r'$\mathit{Xavier_{GPU}}$': 'steelblue', r'$\mathit{Orin}$': 'dimgray'}
 
 first_bar = True
 
-for file, label in [(ROOT + '/single.csv', 'Single (1)'), (ROOT + '/inferred.csv', 'Inferred'),
-                    (ROOT + '/random.csv', 'Random'), (ROOT + '/equal.csv', 'Equal')]:
+for file, label in [(ROOT + '/single.csv', 'Single'), (ROOT + '/inferred.csv', 'Infer'),
+                    (ROOT + '/random.csv', 'Rand'), (ROOT + '/equal.csv', 'Equal')]:
 
     df = pd.read_csv(file)
     df['fact'] = df['pv'] * df['ra']
@@ -26,11 +27,11 @@ for file, label in [(ROOT + '/single.csv', 'Single (1)'), (ROOT + '/inferred.csv
     result = df.groupby('id')['fact'].mean()
     result_dict = result.to_dict()
 
-    result_dict['Laptop CPU'] = result_dict['Laptop0']
-    result_dict['Xavier CPU'] = result_dict['Xavier0']
-    result_dict['Xavier GPU'] = result_dict['Xavier1']
-    result_dict['Orin GPU'] = result_dict['Orin1']
-    result_dict['Nano CPU'] = result_dict['Nano0']
+    result_dict[r'$\mathit{Laptop}$'] = result_dict['Laptop0']
+    result_dict[r'$\mathit{Xavier_{CPU}}$'] = result_dict['Xavier0']
+    result_dict[r'$\mathit{Xavier_{GPU}}$'] = result_dict['Xavier1']
+    result_dict[r'$\mathit{Orin}$'] = result_dict['Orin1']
+    result_dict[r'$\mathit{Nano}$'] = result_dict['Nano0']
     del result_dict['Laptop0']
     del result_dict['Xavier0']
     del result_dict['Xavier1']

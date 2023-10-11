@@ -1,5 +1,3 @@
-import sys
-
 import joblib
 import numpy as np
 from matplotlib import pyplot as plt
@@ -37,9 +35,11 @@ model_Nano = joblib.load("models/Nano.sav")
 x_range = np.linspace(1, 26)
 fig, ax = plt.subplots()
 
-for m, gpu, s, c in [(model_Laptop, 0, "Laptop CPU", "red"), (model_Xavier, 0, "Xavier CPU", "green"),
-                     (model_Xavier, 1, "Xavier GPU", "blue"), (model_Orin, 1, "Orin GPU", "black"),
-                     (model_Nano, 0, "Nano CPU", "orange")]:
+for m, gpu, s, c in [(model_Laptop, 0, r'$\mathit{Laptop}$', "firebrick"),
+                     (model_Xavier, 0, r'$\mathit{Xavier_{CPU}}$', "mediumaquamarine"),
+                     (model_Xavier, 1, r'$\mathit{Xavier_{GPU}}$', "steelblue"),
+                     (model_Orin, 1, r'$\mathit{Orin}$', "dimgray"),
+                     (model_Nano, 0, r'$\mathit{Nano}$', "chocolate")]:
     input_data = np.column_stack((x_range, np.full(x_range.shape, gpu)))
     y_pred_full = m.predict(poly_features.fit_transform(input_data))
     y_pred_factor = y_pred_full[:, 0] * y_pred_full[:, 1]
