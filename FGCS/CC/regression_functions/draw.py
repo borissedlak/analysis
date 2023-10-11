@@ -8,12 +8,14 @@ poly_features = PolynomialFeatures(degree=1)
 model_Laptop = joblib.load("models/Laptop.sav")
 model_Xavier = joblib.load("models/Xavier.sav")
 model_Orin = joblib.load("models/Orin.sav")
+model_Nano = joblib.load("models/Nano.sav")
 
-x_range = np.linspace(1, 16)
+x_range = np.linspace(1, 26)
 fig, ax = plt.subplots()
 
 for m, gpu, s, c in [(model_Laptop, 0, "Laptop CPU", "red"), (model_Xavier, 0, "Xavier CPU", "green"),
-                     (model_Xavier, 1, "Xavier GPU", "blue"), (model_Orin, 1, "Orin GPU", "black")]:
+                     (model_Xavier, 1, "Xavier GPU", "blue"), (model_Orin, 1, "Orin GPU", "black"),
+                     (model_Nano, 0, "Nano CPU", "orange")]:
     input_data = np.column_stack((x_range, np.full(x_range.shape, gpu)))
     y_pred_full = m.predict(poly_features.fit_transform(input_data))
     y_pred_factor = y_pred_full[:, 0] * y_pred_full[:, 1]
@@ -28,8 +30,8 @@ ax.set_ylabel('Estimated (PV x RA)')
 # ax.set_title('Polynomial relation between utilization and part_delay')
 ax.legend()
 ax.set_ylim(0.0, 1.05)
-ax.set_xlim(1, 15)
-ax.set_xticks(range(1, 17, 2))
+ax.set_xlim(1, 20)
+ax.set_xticks(range(1, 25, 3))
 
 ax.grid(True)
 fig.set_size_inches(5.5, 3.3)
