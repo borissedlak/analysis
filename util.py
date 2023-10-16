@@ -82,6 +82,8 @@ def print_BN(bn: BayesianNetwork | pgmpy.base.DAG, root=None, try_visualization=
     if try_visualization:
         vis_ls = ['neato', 'dot', 'twopi', 'fdp', 'sfdp', 'circo']
 
+    plt.figure(figsize=(6, 4.5))
+
     for s in vis_ls:
         pos = graphviz_layout(bn, root=root, prog=s)
         nx.draw(
