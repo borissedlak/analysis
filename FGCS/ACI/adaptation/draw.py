@@ -35,7 +35,7 @@ ax.set_ylim(0.45, 1.03)
 ax.legend()
 
 # Show the plot
-plt.savefig("cycle_iteration.png", dpi=600, bbox_inches="tight")  # default dpi is 100
+plt.savefig("cycle_iteration.eps", dpi=600, bbox_inches="tight", format="eps")  # default dpi is 100
 plt.show()
 
 ############################################################################################################
@@ -68,7 +68,7 @@ ax.set_ylim(0.25, 1.03)
 ax.legend()
 
 # Show the plot
-plt.savefig("slo_change.png", dpi=600, bbox_inches="tight")  # default dpi is 100
+plt.savefig("slo_change.eps", dpi=600, bbox_inches="tight", format="eps")  # default dpi is 100
 plt.show()
 
 ############################################################################################################
@@ -89,13 +89,13 @@ ax.set_xlabel('ACI Cycle Iteration')
 ax.set_ylabel('BIC Surprise')
 ax.legend()
 
-plt.savefig("slo_change_surprise.png", dpi=600, bbox_inches="tight")
+plt.savefig("slo_change_surprise.eps", dpi=600, bbox_inches="tight", format="eps")
 plt.show()
 
 ############################################################################################################
 
-for df, name, star in [(df_stream_change, "stream_change.png", "# Clients Change"),
-                       (df_video_change, "video_change.png", "Video Change")]:
+for df, name, star in [(df_stream_change, "stream_change.eps", "# Clients Change"),
+                       (df_video_change, "video_change.eps", "Video Change")]:
 
     fig, ax = plt.subplots()
 
@@ -123,5 +123,5 @@ for df, name, star in [(df_stream_change, "stream_change.png", "# Clients Change
     ax.set_ylabel('SLO Fulfillment Rate')
     ax.legend()
 
-    plt.savefig(name, dpi=600, bbox_inches="tight")
+    plt.savefig(name, dpi=600, bbox_inches="tight", format="eps")
     plt.show()

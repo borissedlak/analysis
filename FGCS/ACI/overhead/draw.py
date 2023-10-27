@@ -17,15 +17,15 @@ df_gpu_no_aci = df_gpu_no_aci[df_gpu_no_aci['cpu'] != 0]
 
 fig, ax = plt.subplots()
 
-boxplot1 = ax.boxplot(df_bnl['cpu'], positions=[1], labels=['CPU ACI'], patch_artist=True, widths=0.35)
-boxplot2 = ax.boxplot(df_cpu_no_aci['cpu'], positions=[2], labels=['CPU NO'], patch_artist=True, widths=0.35)
-boxplot3 = ax.boxplot(df_gpu_aci['cpu'], positions=[3], labels=['GPU ACI'], patch_artist=True, widths=0.35)
-boxplot4 = ax.boxplot(df_gpu_no_aci['cpu'], positions=[4], labels=['GPU NO'], patch_artist=True, widths=0.35)
+boxplot1 = ax.boxplot(df_bnl['cpu'], positions=[1], labels=[r'[$\mathit{Xavier_{CPU}}$'], patch_artist=True, widths=0.35)
+boxplot2 = ax.boxplot(df_cpu_no_aci['cpu'], positions=[2], labels=['NO ACI]'], patch_artist=True, widths=0.35)
+boxplot3 = ax.boxplot(df_gpu_aci['cpu'], positions=[3], labels=[r'[$\mathit{Xavier_{GPU}}$'], patch_artist=True, widths=0.35)
+boxplot4 = ax.boxplot(df_gpu_no_aci['cpu'], positions=[4], labels=['NO ACI]'], patch_artist=True, widths=0.35)
 
-boxplot1['boxes'][0].set_facecolor('brown')
-boxplot2['boxes'][0].set_facecolor('brown')
-boxplot3['boxes'][0].set_facecolor('gold')
-boxplot4['boxes'][0].set_facecolor('gold')
+boxplot1['boxes'][0].set_facecolor('mediumaquamarine')
+boxplot2['boxes'][0].set_facecolor('mediumaquamarine')
+boxplot3['boxes'][0].set_facecolor('steelblue')
+boxplot4['boxes'][0].set_facecolor('steelblue')
 
 ax.set_ylabel('CPU Utilization (%)')
 # ax.set_ylabel('ACI Cycle Execution (ms)')
@@ -36,7 +36,7 @@ fig.set_size_inches(4.5, 3.3)
 # ax.set_ylim(85, 370)
 
 # Show the plot
-plt.savefig("boxplot_ACI_overhead.png", dpi=600, bbox_inches="tight")  # default dpi is 100
+plt.savefig("boxplot_ACI_overhead.eps", dpi=600, bbox_inches="tight", format="eps")  # default dpi is 100
 plt.show()
 
 df_bnl = pd.read_csv(ROOT + '/training_time.csv')
@@ -69,5 +69,5 @@ ax.set_ylabel('BNL Training Time (s)')
 ax.set_xlabel('ACI Cycle Iteration')
 
 # Show the plot
-plt.savefig("barplot_cycle_length.png", dpi=600, bbox_inches="tight")  # default dpi is 100
+plt.savefig("barplot_cycle_length.eps", dpi=600, bbox_inches="tight", format="eps")  # default dpi is 100
 plt.show()

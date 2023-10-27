@@ -30,5 +30,5 @@ fig.set_size_inches(4.5, 3.3)
 ax.set_ylim(85, 370)
 
 # Show the plot
-plt.savefig("boxplot_ACI_cycle.png", dpi=600, bbox_inches="tight")  # default dpi is 100
+plt.savefig("boxplot_ACI_cycle.eps", dpi=600, bbox_inches="tight", format="eps")  # default dpi is 100
 plt.show()

@@ -59,5 +59,5 @@ ax.set_xticks(range(1, 25, 3))
 
 ax.grid(True)
 fig.set_size_inches(5.5, 3.3)
-plt.savefig("regression_slo_stream.png", dpi=600, bbox_inches="tight")  # default dpi is 100
+plt.savefig("regression_slo_stream.eps", dpi=600, bbox_inches="tight", format="eps")  # default dpi is 100
 plt.show()

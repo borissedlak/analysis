@@ -19,5 +19,5 @@ for file, mini, maxi in [('1/ig.csv', 0.0, 0.3), ('1/pv.csv', 0.0, 1.0), ('1/ra.
                           xticklabels=column_labels, yticklabels=row_labels)
 
     path = file.split('/')
-    plt.savefig(path[0] + '/' + path[0] + '_' + path[1].split('.')[0] + '.png')
+    plt.savefig(path[0] + '/' + path[0] + '_' + path[1].split('.')[0] + '.eps', format="eps")
     plt.show()

@@ -67,7 +67,7 @@ fig.set_size_inches(5.5, 2.1)
 plt.xticks(np.arange(4), ['Single', 'Infer', 'Rand', 'Equal'])
 
 # Show the plot
-plt.savefig("overall_slo_performance.png", dpi=600, bbox_inches="tight")  # default dpi is 100
+plt.savefig("overall_slo_performance.eps", dpi=600, bbox_inches="tight", format="eps")  # default dpi is 100
 plt.show()
 
 fig, ax = plt.subplots()
@@ -129,5 +129,5 @@ fig.set_size_inches(5.5, 2.1)
 plt.xticks(np.arange(4), ['Single', 'Infer', 'Rand', 'Equal'])
 
 # Show the plot
-plt.savefig("overall_slo_performance_avg.png", dpi=600, bbox_inches="tight")  # default dpi is 100
+plt.savefig("overall_slo_performance_avg.eps", dpi=600, bbox_inches="tight", format="eps")  # default dpi is 100
 plt.show()
