@@ -48,7 +48,7 @@ ax.set_xlabel('ACI Cycle Iteration')
 ax.set_ylabel('SLO Fulfillment (%)')
 ax.legend()
 
-plt.savefig("CPU_GPU_KT_Diff.png", dpi=600, bbox_inches="tight")
+plt.savefig("CPU_GPU_KT_Diff.eps", dpi=600, bbox_inches="tight", format="eps")
 plt.show()
 
 # ############################################################################################################
