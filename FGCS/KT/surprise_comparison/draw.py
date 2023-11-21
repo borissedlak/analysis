@@ -22,11 +22,11 @@ surprise_xavier_cpu = surprise_xavier_cpu.reset_index(drop=True)
 surprise_xavier_gpu = surprise_xavier_gpu.reset_index(drop=True)
 
 x = range(0, 31)
-plt.plot(x, surprise_nano['surprise'], color='chocolate', label=r'$\mathit{Nano}$')
-plt.plot(x, surprise_orin['surprise'], color='dimgray', label=r'$\mathit{Orin}$')
-plt.plot(x, surprise_laptop['surprise'], color='firebrick', label=r'$\mathit{Laptop}$')
-plt.plot(x, surprise_xavier_cpu['surprise'], color='mediumaquamarine', label=r'$\mathit{Xavier_{CPU}}$')
-plt.plot(x, surprise_xavier_gpu['surprise'], color='steelblue', label='Combined')
+plt.plot(x, surprise_nano['surprise'], color='chocolate', label=r'Model of $\mathit{Nano}$')
+plt.plot(x, surprise_orin['surprise'], color='dimgray', label=r'Model of $\mathit{Orin}$')
+plt.plot(x, surprise_laptop['surprise'], color='firebrick', label=r'Model of $\mathit{Laptop}$')
+plt.plot(x, surprise_xavier_cpu['surprise'], color='mediumaquamarine', label=r'Model $\mathit{Xavier_{CPU}}$')
+plt.plot(x, surprise_xavier_gpu['surprise'], color='steelblue', label=r'Combined Model')
 
 ax.set_xlim(0, 25)
 # ax.set_xticks([])
@@ -36,8 +36,8 @@ fig.set_size_inches(5, 3.3)
 ax.set_ylabel('BIC Surprise')
 ax.legend()
 
-# plt.savefig("surprise_per_model.png", dpi=600, bbox_inches="tight")
-# plt.show()
+plt.savefig("surprise_per_model.eps", dpi=600, bbox_inches="tight", format="eps")
+plt.show()
 
 # #########################################################################################################
 
@@ -59,7 +59,7 @@ ax.set_yticks([100])
 ax.set_xlabel('ACI Cycle Iteration')
 ax.set_ylabel('CPT Retrain')
 fig.set_size_inches(5, 1.2)
-plt.savefig("surprise_per_model_train.png", dpi=600, bbox_inches="tight")
+plt.savefig("surprise_per_model_train.eps", dpi=600, bbox_inches="tight", format="eps")
 plt.show()
 
 # #########################################################################################################

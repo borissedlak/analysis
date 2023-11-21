@@ -12,9 +12,9 @@ df_mb_one = pd.read_csv(ROOT + '/mb_one.csv')
 fig, ax = plt.subplots()
 
 boxplot1 = ax.boxplot(df_full, positions=[1], labels=['No MB'], patch_artist=True, widths=0.3)
-boxplot2 = ax.boxplot(df_mb_full, positions=[2], labels=['MB [4 SLOs'], patch_artist=True, widths=0.3)
+boxplot2 = ax.boxplot(df_mb_full, positions=[2], labels=['4 SLOs'], patch_artist=True, widths=0.3)
 boxplot3 = ax.boxplot(df_mb_half, positions=[3], labels=['2 SLOs'], patch_artist=True, widths=0.3)
-boxplot4 = ax.boxplot(df_mb_half, positions=[4], labels=['1 SLO]'], patch_artist=True, widths=0.3)
+boxplot4 = ax.boxplot(df_mb_half, positions=[4], labels=['1 SLO'], patch_artist=True, widths=0.3)
 
 boxplot1['boxes'][0].set_facecolor('lightslategray')
 boxplot2['boxes'][0].set_facecolor('steelblue')
