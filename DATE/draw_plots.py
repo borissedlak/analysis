@@ -39,7 +39,7 @@ ax.set_aspect('auto', adjustable='box')
 fig.set_size_inches(6, 4)
 
 # plt.box(False)
-plt.savefig(f"batch_sizes.png", dpi=600, bbox_inches="tight")  # default dpi is 100
+plt.savefig(f"batch_sizes.eps", dpi=600, bbox_inches="tight", format="eps")  # default dpi is 100
 plt.show()
 
 data_interpolated = {
@@ -79,5 +79,5 @@ ax.set_xlabel('Possible Batch Size')
 ax.set_ylabel('Assigned Risk')
 
 
-plt.savefig(f"risk_assigned.png", dpi=600, bbox_inches="tight")  # default dpi is 100
+plt.savefig(f"risk_assigned.eps", dpi=600, bbox_inches="tight", format="eps")  # default dpi is 100
 plt.show()

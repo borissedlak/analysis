@@ -53,7 +53,7 @@ ax.legend()
 
 ax.grid(True)
 fig.set_size_inches(6, 4)
-plt.savefig("relation_batch_size.png", dpi=600, bbox_inches="tight")  # default dpi is 100
+plt.savefig("relation_batch_size.eps", dpi=600, bbox_inches="tight", format="eps")  # default dpi is 100
 plt.show()
 
 # Now second figure
@@ -89,5 +89,5 @@ fig.set_size_inches(3, 4)
 ax.set_ylim(-1, 45)
 
 # Show the plot
-plt.savefig("relation_batch_size_boxplot.png", dpi=600, bbox_inches="tight")  # default dpi is 100
+plt.savefig("relation_batch_size_boxplot.eps", dpi=600, bbox_inches="tight", format="eps")  # default dpi is 100
 plt.show()
